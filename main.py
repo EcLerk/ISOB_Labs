@@ -8,8 +8,8 @@ def get_data(filename):
     with open(filename, 'r', encoding='utf-8') as f:
         data = f.readlines()
 
-    key = data[0]
-    string = data[1]
+    key = data[0].strip('\n')
+    string = data[1].strip('\n')
     return key, string
 
 
@@ -23,7 +23,7 @@ def encrypt_cesar(key, string):
         if curr_index == -1:
             encrypted_str += i.upper() if is_upper else i
         else:
-            encrypted_str += ALPHABET[(curr_index + key) % N].upper() if is_upper else ALPHABET[(curr_index + key) % N]
+            encrypted_str += ALPHABET[(curr_index + (key % N)) % N].upper() if is_upper else ALPHABET[(curr_index + key) % N]
 
     return encrypted_str
 
@@ -38,7 +38,7 @@ def decrypt_cesar(key, string):
         if curr_index == -1:
             decrypted_str += i.upper() if is_upper else i
         else:
-            decrypted_str += ALPHABET[(curr_index - key + N) % N].upper() if is_upper else (
+            decrypted_str += ALPHABET[(curr_index - (key % N) + N) % N].upper() if is_upper else (
                 ALPHABET[(curr_index - key + N) % N])
 
     return decrypted_str
@@ -60,13 +60,34 @@ def encrypt_vigenere(key, string):
     encrypted_str = ''
 
     for i in range(len(string)):
-        index = ALPHABET_EN.find(string[i])
+        is_upper = string[i].isupper()
+        index = ALPHABET_EN.find(string[i].lower())
+
         if index == -1:
-            encrypted_str += string[i]
+            encrypted_str += string[i].upper() if is_upper else string[i]
         else:
-            encrypted_str += ALPHABET_EN[(index + ALPHABET_EN.find(key[i])) % N_EN]
+            encrypted_str += ALPHABET_EN[(index + ALPHABET_EN.find(key[i])) % N_EN].upper() if is_upper else (
+                ALPHABET_EN)[(index + ALPHABET_EN.find(key[i])) % N_EN]
 
     return encrypted_str
+
+
+def decrypt_vigenere(key, string):
+    key = generate_key(key, string)
+    decrypted_str = ''
+
+    for i in range(len(string)):
+        is_upper = string[i].isupper()
+        index = ALPHABET_EN.find(string[i].lower())
+
+        if index == -1:
+            decrypted_str += string[i].upper() if is_upper else string[i]
+        else:
+            decrypted_str += ALPHABET_EN[(index - ALPHABET_EN.find(key[i].lower())) % N_EN].upper() if is_upper else (
+                ALPHABET_EN)[(index - ALPHABET_EN.find(key[i].lower())) % N_EN]
+
+    return decrypted_str
+
 
 
 def main():
@@ -89,9 +110,11 @@ def main():
         elif action == '3':
             key, string = get_data(encryption_path)
             print(encrypt_vigenere(key, string) + '\n')
+        elif action == '4':
+            key, string = get_data(decryption_path)
+            print(decrypt_vigenere(key, string) + '\n')
         elif action == '0':
             return
-
 
 
 if __name__ == '__main__':
